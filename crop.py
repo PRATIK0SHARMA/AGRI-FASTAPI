@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 import os
 import sys
 import json
+from datetime import datetime
 
 import warnings
 warnings.filterwarnings('ignore', category=UserWarning)
@@ -265,6 +266,24 @@ async def predict_disease(
            "language": language
            # Removed "source": source_type - not needed
        }
-
+   
    except Exception as e:
+
        return {"error": f"Prediction failed: {str(e)}"}
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for Docker/ECS monitoring
+    """
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "service": "crop-disease-api",
+        "models_loaded": {
+            "crop_model": crop_model is not None,
+            "disease_model": disease_model is not None
+        }
+    }
+
+      
